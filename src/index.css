@@ -13,8 +13,6 @@ body {
 
 .cursor > svg {
   position: absolute;
-  top: -17.5px;
-  left: -17.5px;
   width: 35px;
   height: 35px;
 }
