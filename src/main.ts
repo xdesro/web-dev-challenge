@@ -9,6 +9,7 @@ import { CursorStateSchema } from '../server/listener';
 import { renderCursor } from './cursor';
 
 const clientID = `client-${nanoid()}`;
+console.log('i am', clientID);
 const transport = new WebSocketClientTransport(
   async () => new WebSocket('wss://cursor-proximity-chat.replit.app/ws'),
   clientID,
@@ -30,6 +31,8 @@ const me: Static<typeof CursorStateSchema> = {
 const localCursorData = new Map<string, {
   interp: PerfectCursor;
   dialed: boolean;
+  lastX: number;
+  lastY: number;
   call?: MediaConnection;
 }>();
 
@@ -37,7 +40,6 @@ const peer = new Peer(clientID, {
   host: "peerjs-server.replit.app",
   port: 80,
   path: "/",
-  secure: true
 });
 
 peer.on('call', async (call) => {
@@ -59,6 +61,8 @@ document.addEventListener('mousemove', (e) => {
     sendUpdate = true
     me.x = e.pageX
     me.y = e.pageY
+
+    void onDistanceUpdate();
   }
 });
 
@@ -80,6 +84,51 @@ const isInitiator = (other: string) => {
   return other.localeCompare(clientID) < 0
 }
 
+async function onDistanceUpdate() {
+  for (const [id, cursorData] of localCursorData.entries()) {
+    const { lastX: x, lastY: y } = cursorData;
+
+    // euclidean distance between cursor and me to determine call
+    const distance = Math.sqrt((x - me.x) ** 2 + (y - me.y) ** 2);
+
+    // scale volume + opacity
+    // const volume = Math.max(0, 1 - distance / 100);
+    const opacity = Math.max(0.3, 1 - distance / 100);
+    const el = document.getElementById(`cursor-${id}`);
+    if (el) {
+      el.style.opacity = opacity.toString();
+    }
+
+    if (distance < 100) {
+      // call if we are initiator
+      if (isInitiator(id) && !cursorData.dialed) {
+        console.log('dialing', id);
+        cursorData.dialed = true;
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+        const call = peer.call(id, stream);
+        cursorData.call = call;
+        call.on('stream', (remoteStream) => {
+          console.log('streaming', id);
+          const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
+          if (!audioEl) return;
+          audioEl.srcObject = remoteStream;
+          // audioEl.volume = volume;
+        });
+      }
+
+      if (cursorData.call) {
+        const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
+        if (!audioEl) return;
+        // audioEl.volume = volume;
+      }
+    } else if (cursorData.call) {
+      // remove call if we are now too far away
+      cursorData.call.close();
+      cursorData.call = undefined;
+    }
+  }
+}
+
 const cursorContainer = document.getElementById('cursor-container')!;
 (async () => {
   for await (const update of resReadable) {
@@ -94,7 +143,12 @@ const cursorContainer = document.getElementById('cursor-container')!;
         cursorContainer.appendChild(cursorEl);
         const addPointClosure = ([x, y]: number[]) => cursorEl.style.setProperty("transform", `translate(${x}px, ${y}px)`);
         const perfectCursor = new PerfectCursor(addPointClosure);
-        localCursorData.set(id, { interp: perfectCursor, dialed: false });
+        localCursorData.set(id, {
+          interp: perfectCursor,
+          dialed: false,
+          lastX: 0,
+          lastY: 0,
+        });
         break;
       case 'update':
         const { x, y } = update.payload.body;
@@ -102,45 +156,11 @@ const cursorContainer = document.getElementById('cursor-container')!;
         if (!cursorData) continue;
 
         cursorData.interp.addPoint([x, y]);
+        cursorData.lastX = x;
+        cursorData.lastY = y;
+        
+        void onDistanceUpdate();
 
-        // euclidean distance between cursor and me to determine call
-        const distance = Math.sqrt((x - me.x) ** 2 + (y - me.y) ** 2);
-
-        // scale volume + opacity
-        const volume = Math.max(0, 1 - distance / 100);
-        const opacity = Math.max(0.3, 1 - distance / 100);
-        const el = document.getElementById(`cursor-${id}`);
-        if (el) {
-          el.style.opacity = opacity.toString();
-        }
-
-        if (distance < 100) {
-          // call if we are initiator
-          if (isInitiator(id) && !cursorData.dialed) {
-            console.log('dialing', id);
-            cursorData.dialed = true;
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-            const call = peer.call(id, stream);
-            cursorData.call = call;
-            call.on('stream', (remoteStream) => {
-              console.log('streaming', id);
-              const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
-              if (!audioEl) return;
-              audioEl.srcObject = remoteStream;
-              audioEl.volume = volume;
-            });
-          }
-
-          if (cursorData.call) {
-            const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
-            if (!audioEl) return;
-            audioEl.volume = volume;
-          }
-        } else if (cursorData.call) {
-          // remove call if we are now too far away
-          cursorData.call.close();
-          cursorData.call = undefined;
-        }
         break;
       case 'leave':
         const oldCursorEl = cursorContainer.querySelector(`#cursor-${id}`);
@@ -154,6 +174,7 @@ const cursorContainer = document.getElementById('cursor-container')!;
         }
 
         oldCursorEl.remove();
+        oldCursorData?.interp.dispose();
         localCursorData.delete(id);
         break;
     }
