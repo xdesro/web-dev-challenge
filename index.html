@@ -6,57 +6,10 @@
     <title>Cursor Proximity Chat</title>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module">
-      import { WebSocketClientTransport } from '@replit/river/transport/ws/client';
-      import { createClient } from '@replit/river';
-      import { nanoid } from 'nanoid';
-      import { PerfectCursor } from "perfect-cursors";
-      import Peer from 'peerjs';
-
-      const clientID = `client-${nanoid()}`;
-      const transport = new WebSocketClientTransport(
-        async () => new WebSocket('ws://localhost:5000'),
-        clientID,
-      );
-
-      const client = createClient(
-        transport,
-        'SERVER',
-        { eagerlyConnect: true },
-      );
-
-      // attach a mouse listener
-      const { reqWritable, resReadable } = await client.room.join.stream({});
-      document.addEventListener('mousemove', (e) => {
-        console.log('write', e.clientX, e.clientY);
-        reqWritable.write({
-          x: e.clientX,
-          y: e.clientY,
-        });
-      });
-
-      (async () => {
-        for await (const state of resReadable) {
-          console.log('state', state);
-        }
-      })();
-
-      // const peer = new Peer(clientID, {
-      //   host: "localhost",
-      //   port: 9000,
-      //   path: "/audio",
-      // });
-
-      // const getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-      // getUserMedia({video: true, audio: true}, function(stream) {
-      //   var call = peer.call('another-peers-id', stream);
-      //   call.on('stream', function(remoteStream) {
-      //     // Show stream in some video/canvas element.
-      //   });
-      // }, function(err) {
-      //   console.log('Failed to get local stream' ,err);
-      // });
-    </script>
+    <div id="app">
+      <div id="cursor-container"></div>
+    </div>
+    <script type="module" src="src/main.ts"></script>
+    <link rel="stylesheet" href="src/index.css">
   </body>
 </html>
