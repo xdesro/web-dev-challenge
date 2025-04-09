@@ -89,14 +89,15 @@ async function onDistanceUpdate() {
     const distance = Math.sqrt((x - me.x) ** 2 + (y - me.y) ** 2);
 
     // scale volume + opacity
-    // const volume = Math.max(0, 1 - distance / 100);
-    const opacity = Math.max(0.3, 1 - distance / 100);
+    const MAX_DISTANCE = 300
+    const volume = Math.max(0.1, 1 - distance / MAX_DISTANCE);
+    const opacity = Math.max(0.3, 1 - distance / MAX_DISTANCE);
     const el = document.getElementById(`cursor-${id}`);
     if (el) {
       el.style.opacity = opacity.toString();
     }
 
-    if (distance < 1000) {
+    if (distance < MAX_DISTANCE) {
       // call if we are initiator
       if (isInitiator(id) && !cursorData.dialed) {
         console.log('dialing', id);
@@ -110,13 +111,8 @@ async function onDistanceUpdate() {
         });
       }
 
-      if (cursorData.call) {
-        const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
-        if (!audioEl) return;
-        // audioEl.volume = volume;
-      }
+      adjustVolume(id, volume);
     } else if (cursorData.call) {
-      console.log("CLOSING CALL")
       // remove call if we are now too far away
       cursorData.call.close();
       cursorData.call = undefined;
@@ -134,6 +130,13 @@ function attachStreamToAudioElement(id: string, stream: MediaStream) {
     console.log(`Audio metadata loaded`);
     audioEl.play().catch(e => console.error('Error playing audio:', e));
   };
+}
+
+function adjustVolume(id: string, volume: number) {
+  const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
+  if (!audioEl) return;
+
+  audioEl.volume = volume;
 }
 
 const cursorContainer = document.getElementById('cursor-container')!;

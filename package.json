@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "build": "tsx build.ts",
     "server": "tsx server/index.ts"
   },
   "dependencies": {
