@@ -81,6 +81,12 @@ const isInitiator = (other: string) => {
   return other.localeCompare(clientID) < 0
 }
 
+const MAX_DISTANCE = 500
+function powerdropOff(rawDist: number, min: number = 0) {
+  const dist = rawDist / MAX_DISTANCE;
+  return dist > 1 ? min : Math.pow(1 - dist, 2);
+}
+
 async function onDistanceUpdate() {
   for (const [id, cursorData] of localCursorData.entries()) {
     const { lastX: x, lastY: y } = cursorData;
@@ -89,9 +95,8 @@ async function onDistanceUpdate() {
     const distance = Math.sqrt((x - me.x) ** 2 + (y - me.y) ** 2);
 
     // scale volume + opacity
-    const MAX_DISTANCE = 300
-    const volume = Math.max(0.1, 1 - distance / MAX_DISTANCE);
-    const opacity = Math.max(0.3, 1 - distance / MAX_DISTANCE);
+    const volume = powerdropOff(distance);
+    const opacity = powerdropOff(distance, 0.2);
     const el = document.getElementById(`cursor-${id}`);
     if (el) {
       el.style.opacity = opacity.toString();
@@ -131,10 +136,10 @@ function attachStreamToAudioElement(id: string, stream: MediaStream) {
 }
 
 function adjustVolume(id: string, volume: number) {
-  // const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
-  // if (!audioEl) return;
-  //
-  // audioEl.volume = volume;
+  const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
+  if (!audioEl) return;
+
+  audioEl.volume = volume;
 }
 
 const cursorContainer = document.getElementById('cursor-container')!;
