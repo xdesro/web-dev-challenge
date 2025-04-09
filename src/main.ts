@@ -41,9 +41,11 @@ const peer = new Peer(clientID, {
 
 peer.on('call', async (call) => {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+  console.log('got call from', call.peer);
   call.answer(stream);
 
   call.on('stream', (remoteStream) => {
+    console.log('streaming', call.peer);
     const audioEl = document.getElementById(`audio-${call.peer}`) as HTMLAudioElement;
     if (!audioEl) return;
     audioEl.srcObject = remoteStream;
@@ -114,11 +116,13 @@ const cursorContainer = document.getElementById('cursor-container')!;
         if (distance < 100) {
           // call if we are initiator
           if (isInitiator(id) && !cursorData.dialed) {
+            console.log('dialing', id);
             cursorData.dialed = true;
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
             const call = peer.call(id, stream);
             cursorData.call = call;
             call.on('stream', (remoteStream) => {
+              console.log('streaming', id);
               const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
               if (!audioEl) return;
               audioEl.srcObject = remoteStream;
