@@ -99,7 +99,7 @@ async function onDistanceUpdate() {
       el.style.opacity = opacity.toString();
     }
 
-    if (distance < 100) {
+    if (distance < 1000) {
       // call if we are initiator
       if (isInitiator(id) && !cursorData.dialed) {
         console.log('dialing', id);
