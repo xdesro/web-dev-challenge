@@ -84,7 +84,7 @@ const isInitiator = (other: string) => {
 const MAX_DISTANCE = 500
 function powerdropOff(rawDist: number, min: number = 0) {
   const dist = rawDist / MAX_DISTANCE;
-  return dist > 1 ? min : Math.pow(1 - dist, 2);
+  return Math.max(dist > 1 ? 0 : Math.pow(1 - dist, 2), min);
 }
 
 async function onDistanceUpdate() {
