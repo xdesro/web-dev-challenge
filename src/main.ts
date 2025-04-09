@@ -42,10 +42,10 @@ const peer = new Peer(clientID, {
   secure: true
 });
 
-const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+const localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
 peer.on('call', async (call) => {
   console.log('got call from', call.peer);
-  call.answer(stream);
+  call.answer(localStream.clone());
 
   call.on('stream', (remoteStream) => {
     attachStreamToAudioElement(call.peer, remoteStream);
@@ -102,7 +102,7 @@ async function onDistanceUpdate() {
       if (isInitiator(id) && !cursorData.dialed) {
         console.log('dialing', id);
         cursorData.dialed = true;
-        const call = peer.call(id, stream);
+        const call = peer.call(id, localStream.clone());
         cursorData.call = call;
         call.on('stream', (remoteStream) => {
           attachStreamToAudioElement(id, remoteStream);
