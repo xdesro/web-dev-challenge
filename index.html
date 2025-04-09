@@ -11,14 +11,15 @@
       import { WebSocketClientTransport } from '@replit/river/transport/ws/client';
       import { createClient } from '@replit/river';
       import { nanoid } from 'nanoid';
-      import { PerfectCursor } from "perfect-cursors"
+      import { PerfectCursor } from "perfect-cursors";
+      import Peer from 'peerjs';
 
+      const clientID = `client-${nanoid()}`;
       const transport = new WebSocketClientTransport(
         async () => new WebSocket('ws://localhost:5000'),
-        `client-${nanoid()}`,
+        clientID,
       );
 
-      transport.bindLogger(console.log);
       const client = createClient(
         transport,
         'SERVER',
@@ -35,9 +36,27 @@
         });
       });
 
-      for await (const state of resReadable) {
-        console.log('state', state);
-      }
+      (async () => {
+        for await (const state of resReadable) {
+          console.log('state', state);
+        }
+      })();
+
+      // const peer = new Peer(clientID, {
+      //   host: "localhost",
+      //   port: 9000,
+      //   path: "/audio",
+      // });
+
+      // const getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+      // getUserMedia({video: true, audio: true}, function(stream) {
+      //   var call = peer.call('another-peers-id', stream);
+      //   call.on('stream', function(remoteStream) {
+      //     // Show stream in some video/canvas element.
+      //   });
+      // }, function(err) {
+      //   console.log('Failed to get local stream' ,err);
+      // });
     </script>
   </body>
 </html>

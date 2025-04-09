@@ -24,13 +24,23 @@ export const RoomService = ServiceSchema.define(
       responseData: CursorRoomStateSchema,
       async handler({ ctx, reqReadable, resWritable }) {
         const cursorId = ctx.from
+        console.log('new cursor :)', cursorId)
+
         // server->client update
         const cleanup = ctx.state.cursors.observe(state => {
+          if (!resWritable) return;
           resWritable.write(Ok(state))
         })
 
         ctx.signal.addEventListener('abort', () => {
+          console.log('cursor leaving :(', cursorId)
           cleanup();
+
+          // after client disconnects, remove their cursor from the state
+          ctx.state.cursors.set(state => {
+            delete state[cursorId];
+            return state;
+          })
         })
 
         // client->server update
@@ -45,8 +55,6 @@ export const RoomService = ServiceSchema.define(
             [cursorId]: req.payload,
           }))
         }
-
-        return;
       },
     }),
   },
