@@ -38,8 +38,8 @@ const localCursorData = new Map<string, {
 
 const peer = new Peer(clientID, {
   host: "peerjs-server.replit.app",
-  port: 80,
   path: "/",
+  secure: true
 });
 
 peer.on('call', async (call) => {
@@ -133,10 +133,10 @@ function attachStreamToAudioElement(id: string, stream: MediaStream) {
 }
 
 function adjustVolume(id: string, volume: number) {
-  const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
-  if (!audioEl) return;
-
-  audioEl.volume = volume;
+  // const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
+  // if (!audioEl) return;
+  //
+  // audioEl.volume = volume;
 }
 
 const cursorContainer = document.getElementById('cursor-container')!;
