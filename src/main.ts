@@ -114,6 +114,7 @@ async function onDistanceUpdate() {
       // remove call if we are now too far away
       cursorData.call.close();
       cursorData.call = undefined;
+      cursorData.dialed = false;
     }
   }
 }
