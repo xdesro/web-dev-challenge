@@ -1,0 +1,23 @@
+{
+  "name": "cursor-proximity-chat",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx index.ts & vite"
+  },
+  "dependencies": {
+    "@replit/river": "^0.207.3",
+    "@sinclair/typebox": "^0.32.35",
+    "nanoid": "^5.1.5",
+    "perfect-cursors": "^1.0.5",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.19.3",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
+  }
+}
