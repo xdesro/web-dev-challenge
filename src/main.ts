@@ -48,10 +48,7 @@ peer.on('call', async (call) => {
   call.answer(stream);
 
   call.on('stream', (remoteStream) => {
-    console.log('streaming', call.peer);
-    const audioEl = document.getElementById(`audio-${call.peer}`) as HTMLAudioElement;
-    if (!audioEl) return;
-    audioEl.srcObject = remoteStream;
+    attachStreamToAudioElement(call.peer, remoteStream);
   });
 });
 
@@ -108,11 +105,8 @@ async function onDistanceUpdate() {
         const call = peer.call(id, stream);
         cursorData.call = call;
         call.on('stream', (remoteStream) => {
-          console.log('streaming', id);
-          const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
-          if (!audioEl) return;
-          audioEl.srcObject = remoteStream;
-          // audioEl.volume = volume;
+          console.log('streaming to', id);
+          attachStreamToAudioElement(id, remoteStream);
         });
       }
 
@@ -122,11 +116,24 @@ async function onDistanceUpdate() {
         // audioEl.volume = volume;
       }
     } else if (cursorData.call) {
+      console.log("CLOSING CALL")
       // remove call if we are now too far away
       cursorData.call.close();
       cursorData.call = undefined;
     }
   }
+}
+
+function attachStreamToAudioElement(id: string, stream: MediaStream) {
+  console.log('Stream has audio tracks:', stream.getAudioTracks().length > 0)
+
+  const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
+  if (!audioEl) return;
+  audioEl.srcObject = stream;
+  audioEl.onloadedmetadata = () => {
+    console.log(`Audio metadata loaded`);
+    audioEl.play().catch(e => console.error('Error playing audio:', e));
+  };
 }
 
 const cursorContainer = document.getElementById('cursor-container')!;
@@ -158,7 +165,7 @@ const cursorContainer = document.getElementById('cursor-container')!;
         cursorData.interp.addPoint([x, y]);
         cursorData.lastX = x;
         cursorData.lastY = y;
-        
+
         void onDistanceUpdate();
 
         break;
