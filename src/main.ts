@@ -28,13 +28,13 @@ const me: Static<typeof CursorStateSchema> = {
   y: 0,
 };
 
-const localCursorData = new Map<string, {
+const localCursorData: Record<string, {
   interp: PerfectCursor;
   dialed: boolean;
   lastX: number;
   lastY: number;
   call?: MediaConnection;
-}>();
+}> = {};
 
 const peer = new Peer(clientID, {
   host: "peerjs-server.replit.app",
@@ -88,7 +88,8 @@ function powerdropOff(rawDist: number, min: number = 0) {
 }
 
 async function onDistanceUpdate() {
-  for (const [id, cursorData] of localCursorData.entries()) {
+  for (const id in localCursorData) {
+    const cursorData = localCursorData[id];
     const { lastX: x, lastY: y } = cursorData;
 
     // euclidean distance between cursor and me to determine call
@@ -156,16 +157,16 @@ const cursorContainer = document.getElementById('cursor-container')!;
         cursorContainer.appendChild(cursorEl);
         const addPointClosure = ([x, y]: number[]) => cursorEl.style.setProperty("transform", `translate(${x}px, ${y}px)`);
         const perfectCursor = new PerfectCursor(addPointClosure);
-        localCursorData.set(id, {
+        localCursorData[id] = {
           interp: perfectCursor,
           dialed: false,
           lastX: 0,
           lastY: 0,
-        });
+        };
         break;
       case 'update':
         const { x, y } = update.payload.body;
-        const cursorData = localCursorData.get(id);
+        const cursorData = localCursorData[id];
         if (!cursorData) continue;
 
         cursorData.interp.addPoint([x, y]);
@@ -180,7 +181,7 @@ const cursorContainer = document.getElementById('cursor-container')!;
         if (!oldCursorEl) continue;
 
         // if call exists, end it
-        const oldCursorData = localCursorData.get(id);
+        const oldCursorData = localCursorData[id];
         if (oldCursorData?.call) {
           oldCursorData.call.close();
           oldCursorData.call = undefined;
@@ -188,7 +189,7 @@ const cursorContainer = document.getElementById('cursor-container')!;
 
         oldCursorEl.remove();
         oldCursorData?.interp.dispose();
-        localCursorData.delete(id);
+        delete localCursorData[id];
         break;
     }
   }
