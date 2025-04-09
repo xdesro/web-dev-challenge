@@ -42,8 +42,8 @@ const peer = new Peer(clientID, {
   secure: true
 });
 
+const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
 peer.on('call', async (call) => {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
   console.log('got call from', call.peer);
   call.answer(stream);
 
@@ -102,11 +102,9 @@ async function onDistanceUpdate() {
       if (isInitiator(id) && !cursorData.dialed) {
         console.log('dialing', id);
         cursorData.dialed = true;
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
         const call = peer.call(id, stream);
         cursorData.call = call;
         call.on('stream', (remoteStream) => {
-          console.log('streaming to', id);
           attachStreamToAudioElement(id, remoteStream);
         });
       }
@@ -121,14 +119,13 @@ async function onDistanceUpdate() {
 }
 
 function attachStreamToAudioElement(id: string, stream: MediaStream) {
-  console.log('Stream has audio tracks:', stream.getAudioTracks().length > 0)
-
+  console.log('got stream', id);
   const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
   if (!audioEl) return;
   audioEl.srcObject = stream;
-  audioEl.onloadedmetadata = () => {
-    console.log(`Audio metadata loaded`);
-    audioEl.play().catch(e => console.error('Error playing audio:', e));
+  audioEl.onloadedmetadata = async () => {
+    await audioEl.play()
+    console.log('streaming audio')
   };
 }
 
