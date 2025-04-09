@@ -10,7 +10,7 @@ import { renderCursor } from './cursor';
 
 const clientID = `client-${nanoid()}`;
 const transport = new WebSocketClientTransport(
-  async () => new WebSocket('ws://localhost:5000'),
+  async () => new WebSocket('wss://cursor-proximity-chat.replit.app/ws'),
   clientID,
 );
 
@@ -34,7 +34,7 @@ const localCursorData = new Map<string, {
 }>();
 
 const peer = new Peer(clientID, {
-  host: "localhost",
+  host: "cursor-proximity-chat.replit.app",
   port: 9000,
   path: "/audio",
 });

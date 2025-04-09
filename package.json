@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx server/index.ts & vite"
+    "dev": "vite"
   },
   "dependencies": {
     "@replit/river": "^0.207.3",
