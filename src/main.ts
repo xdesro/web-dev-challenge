@@ -122,6 +122,7 @@ const cursorContainer = document.getElementById('cursor-container')!;
               const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
               if (!audioEl) return;
               audioEl.srcObject = remoteStream;
+              audioEl.volume = volume;
             });
           }
 
