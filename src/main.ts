@@ -2,16 +2,28 @@ import { WebSocketClientTransport } from '@replit/river/transport/ws/client';
 import { createClient } from '@replit/river';
 import { nanoid } from 'nanoid';
 import { PerfectCursor } from "perfect-cursors";
-import Peer, { MediaConnection } from 'peerjs';
+import Peer, { MediaConnection, PeerOptions } from 'peerjs';
 import type { ServiceSurface } from '../server/index';
 import { Static } from '@sinclair/typebox';
 import { CursorStateSchema } from '../server/listener';
 import { renderCursor } from './cursor';
 
 const clientID = `client-${nanoid()}`;
-console.log('i am', clientID);
+console.log(`id: ${clientID}`);
+
+const WS_URL = import.meta.env.VITE_LOCAL ? 'ws://localhost:5000/ws' : 'wss://cursor-proximity-chat.replit.app/ws';
+const PEER_OPTIONS: PeerOptions = import.meta.env.VITE_LOCAL ? {
+  host: 'localhost',
+  port: 3000,
+  path: '/',
+} : {
+  host: 'peerjs-server.replit.app',
+  path: '/',
+  secure: true,
+}
+
 const transport = new WebSocketClientTransport(
-  async () => new WebSocket('wss://cursor-proximity-chat.replit.app/ws'),
+  async () => new WebSocket(WS_URL),
   clientID,
 );
 
@@ -36,15 +48,10 @@ const localCursorData: Record<string, {
   call?: MediaConnection;
 }> = {};
 
-const peer = new Peer(clientID, {
-  host: "peerjs-server.replit.app",
-  path: "/",
-  secure: true
-});
-
+const peer = new Peer(clientID, PEER_OPTIONS);
 const localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
 peer.on('call', async (call) => {
-  console.log('got call from', call.peer);
+  console.log(`call from ${call.peer}`);
   call.answer(localStream.clone());
 
   call.on('stream', (remoteStream) => {
@@ -106,7 +113,7 @@ async function onDistanceUpdate() {
     if (distance < MAX_DISTANCE) {
       // call if we are initiator
       if (isInitiator(id) && !cursorData.dialed) {
-        console.log('dialing', id);
+        console.log(`call to ${id}`);
         cursorData.dialed = true;
         const call = peer.call(id, localStream.clone());
         cursorData.call = call;
@@ -126,13 +133,11 @@ async function onDistanceUpdate() {
 }
 
 function attachStreamToAudioElement(id: string, stream: MediaStream) {
-  console.log('got stream', id);
   const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
   if (!audioEl) return;
   audioEl.srcObject = stream;
   audioEl.onloadedmetadata = async () => {
     await audioEl.play()
-    console.log('streaming audio')
   };
 }
 

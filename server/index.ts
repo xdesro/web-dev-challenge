@@ -5,8 +5,6 @@ import { createServer } from '@replit/river';
 import { RoomService } from './service';
 
 const httpServer = http.createServer();
-const port = 5000;
-
 const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 const transport = new WebSocketServerTransport(wss, 'SERVER');
 
@@ -17,8 +15,8 @@ export const services = {
 export type ServiceSurface = typeof services;
 export const riverServer = createServer(transport, services);
 
-httpServer.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+httpServer.listen(5000, () => {
+  console.log(`wss server running on localhost:5000`);
 });
 
 httpServer.on("request", (req, res) => {

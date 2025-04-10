@@ -4,14 +4,17 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsx build.ts",
-    "server": "tsx server/index.ts"
+    "site:dev": "vite",
+    "site:build": "vite build",
+    "all": "VITE_LOCAL=1 vite & npm run signalling & npm run server",
+    "server": "tsx server/index.ts",
+    "signalling": "tsx signalling/index.ts"
   },
   "dependencies": {
     "@replit/river": "^0.207.3",
     "@sinclair/typebox": "^0.32.35",
     "nanoid": "^5.1.5",
+    "peer": "^1.0.2",
     "peerjs": "^1.5.4",
     "perfect-cursors": "^1.0.5",
     "ws": "^8.18.1"
