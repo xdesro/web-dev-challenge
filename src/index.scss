@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css2?family=Jacquard+12&display=swap");
+:root {
+  --font-display: "Jacquard 12";
+  --self-cursor-pos-x: 0;
+  --self-cursor-pos-y: 0;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0d0d0d;
+}
+
+.view {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  place-items: center;
+  color: #fff;
+  font-family: var(--font-display);
+}
+.start-game {
+  &__title {
+    font-weight: normal;
+    color: transparent;
+    -webkit-text-stroke: 1px #fff;
+    text-stroke: 1px #fff;
+    font-size: clamp(3rem, 15vw, 16rem);
+    margin-block-start: 0;
+    margin-block-end: 0.25em;
+  }
+  &__action {
+    font: inherit;
+    font-size: 2.5rem;
+    border-radius: 2px;
+    text-decoration: none;
+    background-color: transparent;
+    border: 1px solid #fff;
+    cursor: pointer;
+    color: #fff;
+    padding: 0.5rem 3rem;
+    &:hover,
+    &:focus {
+      color: #0d0d0d;
+      background-color: #fff;
+    }
+  }
+}
+
+#cursor-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  cursor: none;
+  width: 100vw;
+  height: 100vh;
+}
+
+.cursor {
+  position: absolute;
+  top: 0;
+  aspect-ratio: 1;
+  left: 0;
+  transform: translateX(var(--self-cursor-pos-x))
+    translateY(var(--self-cursor-pos-y));
+  width: 5rem;
+  display: grid;
+  place-items: center;
+  margin-inline-start: -2.5rem;
+  margin-block-start: -2.5rem;
+  // maybe todo, calc the length to the short side
+  background-image: radial-gradient(circle at center, grey, transparent 70%);
+  svg {
+    width: 0.75rem;
+  }
+}

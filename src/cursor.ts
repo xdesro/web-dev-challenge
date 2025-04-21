@@ -1,25 +1,9 @@
 function getSvgForCursor(color: string) {
-  return `<svg
-  xmlns="http://www.w3.org/2000/svg"
-  viewBox="10 9 34 34"
-  width="36"
-  height="36"
-  fill="none"
-  fillRule="evenodd"
->
-  <g fill="rgba(0,0,0,.2)" transform="translate(1,1)">
-    <path d="m12 24.4219v-16.015l11.591 11.619h-6.781l-.411.124z" />
-    <path d="m21.0845 25.0962-3.605 1.535-4.682-11.089 3.686-1.553z" />
-  </g>
-  <g fill="white">
-    <path d="m12 24.4219v-16.015l11.591 11.619h-6.781l-.411.124z" />
-    <path d="m21.0845 25.0962-3.605 1.535-4.682-11.089 3.686-1.553z" />
-  </g>
-  <g fill="${color}">
-    <path d="m19.751 24.4155-1.844.774-3.1-7.374 1.841-.775z" />
-    <path d="m13 10.814v11.188l2.969-2.866.428-.139h4.768z" />
-  </g>
-</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="19" viewBox="0 0 12 19">
+  <path fill="#000" d="M0 0h1v16H0V0Zm1 1h1v1H1V1Zm6 6h1v1H7V7ZM4 4h1v1H4V4Zm6 6h1v1h-1v-1Zm-9 5h1v1H1v-1Zm1-1h1v1H2v-1Zm5-2h4v1H7v-1ZM2 2h1v1H2V2Zm6 6h1v1H8V8ZM5 5h1v1H5V5Zm6 6h1v2h-1v-2ZM3 3h1v1H3V3Zm6 6h1v1H9V9Zm-6 4h1v1H3v-1Zm4 0h1v1H7v-1Zm1 1h1v2H8v-2Zm1 2h1v2H9v-2Zm-5-2h1v2H4v-2Zm1 2h1v2H5v-2Zm1 2h3v1H6v-1ZM6 6h1v1H6V6Z"/>
+  <path fill="${color}" d="M2 2H1v13h1v-1h1v-1h1v1h1v2h1v2h3v-2H8v-2H7v-2h4v-1h-1v-1H9V9H8V8H7V7H6V6H5V5H4V4H3V3H2V2Z"/>
+</svg>
+`;
 }
 
 export function renderCursor(id: string, color: string): HTMLElement {
