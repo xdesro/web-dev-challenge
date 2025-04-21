@@ -1,8 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Jacquard+12&display=swap");
 :root {
   --font-display: "Jacquard 12";
-  --self-cursor-pos-x: 0;
-  --self-cursor-pos-y: 0;
+  --self-cursor-x: 0;
+  --self-cursor-y: 0;
 }
 
 *,
@@ -26,6 +26,7 @@ body {
   color: #fff;
   font-family: var(--font-display);
 }
+
 .start-game {
   &__title {
     font-weight: normal;
@@ -36,6 +37,7 @@ body {
     margin-block-start: 0;
     margin-block-end: 0.25em;
   }
+
   &__action {
     font: inherit;
     font-size: 2.5rem;
@@ -68,15 +70,25 @@ body {
   top: 0;
   aspect-ratio: 1;
   left: 0;
-  transform: translateX(var(--self-cursor-pos-x))
-    translateY(var(--self-cursor-pos-y));
-  width: 5rem;
+  width: 10rem;
   display: grid;
   place-items: center;
   margin-inline-start: -2.5rem;
   margin-block-start: -2.5rem;
   // maybe todo, calc the length to the short side
-  background-image: radial-gradient(circle at center, grey, transparent 70%);
+  &--self {
+    opacity: clamp(0.5, calc(var(--self-volume) * 100), 1);
+    transition: 0.1s;
+    transition-property: background-image, opacity;
+    background-image: radial-gradient(
+      circle at center,
+      lightgrey,
+      transparent clamp(50%, calc(var(--self-volume) * 700%), 70%)
+    );
+
+    z-index: 1;
+    transform: translateX(var(--self-cursor-x)) translateY(var(--self-cursor-y));
+  }
   svg {
     width: 0.75rem;
   }

@@ -65,14 +65,14 @@ async function start() {
   mediaStreamAudioSourceNode.connect(analyserNode);
 
   const pcmData = new Float32Array(analyserNode.fftSize);
-  const getVolume = () => {
+  const getVolume = (): number => {
     analyserNode.getFloatTimeDomainData(pcmData);
-    let sumSquares = 0.0;
+    let sum = 0.0;
     for (const amplitude of pcmData) {
-      sumSquares += amplitude * amplitude;
+      sum += Math.abs(amplitude);
     }
 
-    return Math.sqrt(sumSquares / pcmData.length);
+    return sum / pcmData.length;
   };
 
   peer.on("call", async (call) => {
@@ -83,11 +83,8 @@ async function start() {
     });
   });
 
-  let sendUpdate = false;
   document.addEventListener("mousemove", (e) => {
-    console.log("mousemove");
     if (me.x !== e.pageX && me.y !== e.pageY) {
-      sendUpdate = true;
       me.x = e.pageX;
       me.y = e.pageY;
 
@@ -105,10 +102,13 @@ async function start() {
   });
 
   setInterval(() => {
-    if (sendUpdate && reqWritable.isWritable()) {
-      me.volume = getVolume();
+    me.volume = getVolume();
+    document.documentElement.style.setProperty("--self-volume", `${me.volume}`);
+  }, 10);
+
+  setInterval(() => {
+    if (reqWritable.isWritable()) {
       reqWritable.write(me);
-      sendUpdate = false;
     }
   }, 100);
 
@@ -138,7 +138,7 @@ async function start() {
       const distance = Math.sqrt((x - me.x) ** 2 + (y - me.y) ** 2);
 
       // scale volume + opacity
-      const opacity = powerdropOff(distance, 0.2);
+      const opacity = powerdropOff(distance, 0);
       const el = document.getElementById(`cursor-${id}`);
       if (el) {
         el.style.opacity = opacity.toString();
